@@ -2,7 +2,8 @@
 
 # GazeAtDS1054 - a RIGOL DS1054Z viewer
 
-Gazing at my scope and trying to read the numbers on the display, made me write this little program which was supposed to display the data nice and big on my PC screen. The project turned out to be fun and thus got out of hand a little. Have a look at what it does and if you find it could be useful to you, be welcome to download and use it:
+Got tired gazing at my scope, trying to read the small numbers on the display. So this little program was meant to display the data nice and big on my PC screen. The more the project turned out to be fun, the more it got out of hand. 
+In short: An other Rigol-Viewer - this time for Linux based OS's. Have a look at what it does and if you find it could be useful to you, be welcome to download and use it:
 
 - free of charge (see license )
 - free of guarantee (see the license)
@@ -14,7 +15,7 @@ Gazing at my scope and trying to read the numbers on the display, made me write 
 
 GazAtDS1054 captures data from the RIGOL DS1054Z scope and:
 
-- displays selected measurements in a definable grid form
+- displays selected measurements in a free definable grid form
 - displays and exports screen-shots from the scope display
 - displays and exports wave forms and FFTs
 
@@ -24,29 +25,39 @@ GazAtDS1054 captures data from the RIGOL DS1054Z scope and:
 
 
 
-## What is it made of
+## What are the requirements
 
-This application runs on Ubuntu and is written in FPC-Lazarus and calls P4D components to access the scope using Python/PyVisa.
+This application runs on Linux distros. It was developed on Ubuntu with FPC-Lazarus. It accesses the scope via Python/PyVisa using P4D components.
 
-It is tested with the following 64bit versions of Ubuntu and Python:
+GazeAtDS1054 was tested with the following 64bit Linux distros:
 
-- ubuntu-18.04.5-desktop-amd64
-- ubuntu-20.04.2.0-desktop-amd64
-- ubuntu-20.04.2.0-desktop-amd64 (live from USB)
-- debian-live-10.9.0-amd64-gnome+nonfree (manual install / quick test)
+- ubuntu-18.04.5-desktop-amd64 (installed and live USB)
+- ubuntu-20.04.2.0-desktop-amd64 (installed and live USB)
+- debian-live-10.9.0-amd64-gnome+nonfree (live USB)
+- Fedora 34 (Workstation Edition)
+- Manjaro -gnome-21.0.3
+
+and the Python 64bit versions:
+
 - python 3.6
 - python 3.8
 - python 3.9
 
-You might be lucky with other flavors of Ubuntu using Python3 or Python4. 
+You might be out of luck with Ubuntu versions < 18.04 or Python versions < 3.6. But chances are good, it runs on newer versions of other Ubuntu flavors or Debian derivatives. 
 
 
 
 ## Install it
 
-In this Documentation it is assumed, that a single Python3 version is installed and used. Thus all commands referencing to Python, "python3" is used. If more than one python version is installed, make sure you are referring to a specific version by using the minor version in commands (e.g. "python3.9" or "python4.2" etc)
+In this Documentation it is assumed, that a single Python3 version is installed and used. Thus in all commands Python is referred to as "python3". If more than one python version is installed, make sure you are referring to a specific version by using the minor version in commands (e.g. "python3.9" or "python4.2" etc)
 
 If a working version of PyVisa is already  installed on your system,  you want to Check the connection to the scope first (see below). If this is successful, it might be better to just unzip the application files instead of installing yet another version of PyVisa.
+
+This application uses gtk2. If, on some of the leading edge distros, a higher version of gtk is used, gtk2 can be installed like:
+
+```
+$ sudo apt install gtk2
+```
 
 If you use Python3 on an Ubuntu installation, GazeAtDS1054 can be installed from the deb package. Make sure you have Universe Repository enabled before  updating your system. Then run those commands from the terminal:
 
@@ -54,6 +65,9 @@ If you use Python3 on an Ubuntu installation, GazeAtDS1054 can be installed from
 $ sudo apt update
 $ sudo apt install <file-location>/gazeatds1054_x.x.x-x_amd64.deb
 $ # Please reboot the system now.
+$ # Or, if you don't want to reboot, reloading the rules should suffice:
+$ sudo udevadm control --reload-rules
+$ sudo udevadm trigger
 ```
 
 Find more install options in section More... below.
@@ -76,7 +90,7 @@ There is no extensive Help system coming with GazeAtDS1054 nor is there a Users 
 
 #### Configuration
 
-The first time GazeAtDS1054 is run, a configuration dialog is displayed.
+The first time GazeAtDS1054 is started up, a configuration dialog is displayed.
 
 ![](images/config.gif)
 
@@ -88,9 +102,7 @@ You will be asked to confirm/modify
   ```
   $ python3 --version   #or python4 --version
   Python 3.6.9
-  $ ls -l /usr/lib/x86_64-linux-gnu/libpython3.6*.so* | sed 's/.*\/usr/\/usr/'
-  /usr/lib/x86_64-linux-gnu/libpython3.6m.so -> libpython3.6m.so.1
-  /usr/lib/x86_64-linux-gnu/libpython3.6m.so.1 -> libpython3.6m.so.1.0
+  $ find / -type f -iwholename "/usr/*libpython3.6*.so*" 2>&1 | grep -v 'config\|Permission' 
   /usr/lib/x86_64-linux-gnu/libpython3.6m.so.1.0
   ```
   
@@ -128,26 +140,23 @@ $ /opt/GazeAtDS1054/GazeAtDS1054 --info
 
 #### Manual Installation
 
-If, for some reason - perhaps you want to use Python4 - you want to  install GazeAtDS1054 manually, all application files are available in gazeatds1054_x.x.x-x_amd64.zip and the following terminal commands might get you there:
+If you want to  install GazeAtDS1054 manually (your Linux distro can't handle deb-packages or Python4 is being used etc), all application files are available in gazeatds1054_x.x.x-x_amd64.zip and the following terminal commands might get you there:
 
 ```
 $ sudo apt update
-$ # if Ubuntu do the following:
 $ sudo apt install python3-pip
 $ python3 -m pip install pyvisa
 $ python3 -m pip install pyvisa-py
 $ python3 -m pip install pyusb
-$ # else if Debian
-$ sudo apt install python3-pyvisa-py
-$ sudo apt install python3-usb
-$ # fi
 $ sudo unzip <PathToZip>gazeatds1054_x.x.x-x_amd64.zip -d /
 $ sudo groupadd usbusers
 $ sudo usermod -aG usbusers $USER
 $ sudo usermod -aG dialout $USER
 $ mkdir /home/$USER/.config/GazeAtDS1054
 $ chmod 755 /home/$USER/.config/GazeAtDS1054
-$ # Reboot the system now.
+$ # If you don't want to reboot now, do this:
+$ sudo udevadm control --reload-rules
+$ sudo udevadm trigger
 ```
 
 #### Additional Users
@@ -244,8 +253,8 @@ Note: Disconnect USB cable it you are using the Ethernet connection.
 
 ```
 $ python3
->>> import pyvisa
->>> rm=pyvisa.ResourceManager("@py")
+>>> import pyvisa as visa
+>>> rm=visa.ResourceManager("@py")
 >>> print(rm.list_resources())
 ('USB0::6833::1230::DS1ZA220100107::0::INSTR',)
 >>> scope=rm.open_resource('USB0::6833::1230::DS1ZA220100107::0::INSTR')
