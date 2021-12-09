@@ -2,7 +2,7 @@
 
 # GazeAtDS1054 - a RIGOL DS1054Z viewer
 
-Got tired gazing at my scope, trying to read the small numbers on the display. So this little program was meant to display the data nice and big on my PC screen. The more the project turned out to be fun, the more it got out of hand. 
+Got tired gazing at my scope, trying to read the small numbers on the display. So this little program was meant to display the data nice and big on my PC screen. The more the project turned out to be fun, the more it got out of hand. But to be clear: Nothing is done here that the DS1054 could not do - but all is done a little bit bigger and a little bit different.
 In short: An other Rigol-Viewer - this time for Linux based OS's. Have a look at what it does and if you find it could be useful to you, be welcome to download and use it:
 
 - free of charge (see license )
@@ -13,11 +13,19 @@ In short: An other Rigol-Viewer - this time for Linux based OS's. Have a look at
 
 ## What does it do
 
-GazAtDS1054 captures data from the RIGOL DS1054Z scope and:
+GazeAtDS1054: A viewer for the RIGOL DS1054Z for Linux distros. It captures data from the oscilloscope via USB or TCP and:
 
 - displays selected measurements in a free definable grid form
 - displays and exports screen-shots from the scope display
-- displays and exports wave forms and FFTs
+- displays and exports wave-, protocol- and FFT-data in LowRes or HighRes mode. Protocol data can also be exported and viewed in Pulseview.
+
+Data from the scope can be acquired in two ways:
+
+- LowRes mode: This downloads the scope display which is 1200 pts wide.
+
+- HighRes mode: This downloads the scope memory (or part of) which can be up to 12M pts per channel. HighRes downloading can take quite a while depending on the connection (USB or TCP) and the selected data range.
+
+  
 
 ![](images/runap.gif)
 
@@ -29,7 +37,9 @@ GazAtDS1054 captures data from the RIGOL DS1054Z scope and:
 
 This application runs on Linux distros. It was developed on Ubuntu with FPC-Lazarus. It accesses the scope via Python/PyVisa using P4D components.
 
-GazeAtDS1054 was tested with the following 64bit Linux distros:
+If protocol analyses will be done, Sigrok-cli and/or PulseView have to be installed
+
+Various versions of GazeAtDS1054 were tested on the following 64bit Linux distros:
 
 - ubuntu-18.04.5-desktop-amd64 (installed and live USB)
 - ubuntu-20.04.2.0-desktop-amd64 (installed and live USB)
@@ -42,6 +52,13 @@ and the Python 64bit versions:
 - python 3.6
 - python 3.8
 - python 3.9
+
+and the Sigrok 64-bit versions of:
+
+- sigrok-cli 0.7.0
+- sigrok-cli 0.7.2
+- PulseView 0.4.0
+- PulseView 0.4.2
 
 You might be out of luck with Ubuntu versions < 18.04 or Python versions < 3.6. But chances are good, it runs on newer versions of other Ubuntu flavors or Debian derivatives. 
 
@@ -69,6 +86,8 @@ $ # Or, if you don't want to reboot, reloading the rules should suffice:
 $ sudo udevadm control --reload-rules
 $ sudo udevadm trigger
 ```
+
+Suggestion: Boot up a Live version of your favored OS to test Gaze@DS1054. That's how I tested the application.
 
 Find more install options in section More... below.
 
@@ -107,12 +126,18 @@ You will be asked to confirm/modify
   ```
   
 - the USB/LAN Visa addresses for the scope
-  If a USB connection is available, the addresses are automatically filled in
+  If a USB connection to the scope is available, the addresses are automatically filled in
   Else you have to type in the addresses manually the LAN Visa Address being available from the IO.Settings of the scope and the USB Visa Address usually being  'USB0::6833::1230::DS1ZA220100107::0::INSTR'
   
 - The connection Type USB or TCP you wish to use. 
   This can be changed later using the Run option `--change-input-type`.
   Note: If TCP is used, the USB cable has to be removed.
+  
+- The path to the Sigrok-cli application if you intend to analyse protocol data.
+
+- The path to the PulseView application if you intend to analyse protocol data with PulseView.
+
+Finally, you can send your configuration details to the developer (yes, that's me!). It would be appreciated a lot, give me an additional kick to continue bothering about the project instead of growing lonely and having sour feelings.
 
 #### Run options
 
@@ -154,6 +179,9 @@ $ sudo usermod -aG usbusers $USER
 $ sudo usermod -aG dialout $USER
 $ mkdir /home/$USER/.config/GazeAtDS1054
 $ chmod 755 /home/$USER/.config/GazeAtDS1054
+$ mkdir /home/$USER/.config/GazeAtDS1054/sigrok
+$ chmod 755 /home/$USER/.config/GazeAtDS1054/sigrok
+$ echo 2 > /home/$USER/.config/GazeAtDS1054/sigrok/version
 $ # If you don't want to reboot now, do this:
 $ sudo udevadm control --reload-rules
 $ sudo udevadm trigger
@@ -180,6 +208,7 @@ $ sudo deluser $USER usbusers
 $ # delete all files listed by zipinfo
 $ zipinfo -1 <DirToZip>/gazeatds1054_x.x.x-x_amd64.zip 
 $ rm -R /home/$USER/.config/GazeAtDS1054
+$ # if $USER does not need to be member of usbusers, remove it
 $ sudo deluser $USER usbusers
 $ # if pyvisa is not used anywhere else, remove it
 $ python3 -m pip uninstall pyusb
@@ -263,3 +292,18 @@ RIGOL TECHNOLOGIES,DS1054Z,DS1ZA220100107,00.04.04.SP4\n
 >>>
 ```
 
+#### A word about Sigrok
+
+The Sigrok decoder library spots different option parameter-names between lib-versions. I setteled for libsigrokdecode_0.5.3.  If analysing protocols with Gaze@Wave does not work, you can try to use PulseView or check on your decode libray as follows:
+
+```
+$ cat /usr/share/libsigrokdecode/decoders/uart/pd.py | grep num_data_bits
+```
+
+If this finds any occurences of num_data_bits, then you got an older library version.  You can try to install a newer version of the library or of Sigrok altogether. I circumnavigated the problem by patching the Sigrok installation, downloading libsigrokdecode_0.5.3.orig.tar.gz and extract the decoders folder to  ~/.local/share/libsigrokdecode/ . Check the lib like so:
+
+```
+$ cat ~/.local/share/libsigrokdecode/decoders/uart/pd.py | grep "'data_bits'"
+```
+
+If this gives you a valid output, you should be good to go. Good luck!
