@@ -13,7 +13,7 @@ In short: An other Rigol-Viewer - this time for Linux based OS's. Have a look at
 
 ## What does it do
 
-GazeAtDS1054: A viewer for the RIGOL DS1054Z for Linux distros. It captures data from the oscilloscope via USB or TCP and:
+GazeAtDS1054: A viewer for the RIGOL DS1054Z (though according to the RIGOL specs, it should work with all MSO1000Z/DS1000Z series digital oscilloscopes) for Linux distros. It captures data from the oscilloscope via USB or TCP and:
 
 - displays selected measurements in a free definable grid form
 - displays and exports screen-shots from the scope display
@@ -66,6 +66,22 @@ You might be out of luck with Ubuntu versions < 18.04 or Python versions < 3.6. 
 
 ## Install it
 
+If you are running a Debian derivative like Ubuntu with Python3  the installation is straight forward. Make sure Universe Repository is enabled. Then:
+
+```
+$ sudo apt update
+$ sudo apt install <file-location>/gazeatds1054_x.x.x-x_amd64.deb
+$ # Install Sigrok if you are going to use protocol analyser
+$ sudo apt install sigrok   
+$ # Please reboot the system now.
+$ # Or, if you don't want to reboot, reloading the rules should suffice:
+$ sudo udevadm control --reload-rules
+$ sudo udevadm trigger
+```
+
+Done!
+Read on for installation on other OS configurations.
+
 In this Documentation it is assumed, that a single Python3 version is installed and used. Thus in all commands Python is referred to as "python3". If more than one python version is installed, make sure you are referring to a specific version by using the minor version in commands (e.g. "python3.9" or "python4.2" etc)
 
 If a working version of PyVisa is already  installed on your system,  you want to Check the connection to the scope first (see below). If this is successful, it might be better to just unzip the application files instead of installing yet another version of PyVisa.
@@ -74,17 +90,6 @@ This application uses gtk2. If, on some of the leading edge distros, a higher ve
 
 ```
 $ sudo apt install gtk2
-```
-
-If you use Python3 on an Ubuntu installation, GazeAtDS1054 can be installed from the deb package. Make sure you have Universe Repository enabled before  updating your system. Then run those commands from the terminal:
-
-```
-$ sudo apt update
-$ sudo apt install <file-location>/gazeatds1054_x.x.x-x_amd64.deb
-$ # Please reboot the system now.
-$ # Or, if you don't want to reboot, reloading the rules should suffice:
-$ sudo udevadm control --reload-rules
-$ sudo udevadm trigger
 ```
 
 Suggestion: Boot up a Live version of your favored OS to test Gaze@DS1054. That's how I tested the application.
